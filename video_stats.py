@@ -30,9 +30,49 @@ def get_playlist_id():
         
     except requests.exceptions.RequestException as e:
         raise e
+    
+    
+    
+def getvideoids(playlistid):
+    
+    
+    videoids=[]
+    pageToken = None
+
+    base_url = f"https://youtube.googleapis.com/youtube/v3/playlistItems?part=contentDetails&maxResults=50&playlistId={playlistid}&key={api_key}"
+
+    try:
+        
+        while True:
+            
+            url=base_url
+            
+            if pageToken:
+                url += f"&pageToken={pageToken}"
+            response = requests.get(url)
+            response.raise_for_status()
+            data = response.json()
+        
+            for item in data.get("items", []):
+                videoid = item["contentDetails"]["videoId"]
+                videoids.append(videoid)
+                
+            pageToken=data.get("nextPageToken")
+            
+            if not pageToken:
+                break
+            
+        return videoids
+            
+    except requests.exceptions.RequestException as e:
+        raise e
         
         
 if __name__ == "__main__":
 
-    get_playlist_id()
+    playlistid=get_playlist_id()
+    getvideoids(playlistid)
     
+    
+    
+        
